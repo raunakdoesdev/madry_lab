@@ -25,7 +25,7 @@ class WhiteboxPGD(torch.nn.Module):
         return torch.clamp(torch.min(torch.max(adv, img - eps), img + eps), 0.0, 1.0)
 
     def forward(self, inp, target, eps, step_size, iterations, **kwargs):
-        adv = inp + torch.rand_like(inp)
+        adv = inp + step_size * torch.rand_like(inp)
         for _ in range(iterations):
             adv = adv.clone().detach().requires_grad_(True)
             loss = self.calc_loss(adv, target)
