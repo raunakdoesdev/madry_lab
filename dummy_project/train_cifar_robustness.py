@@ -19,9 +19,11 @@ class WhiteboxPGD(torch.nn.Module):
         self.normalize = helpers.InputNormalize(dataset.mean, dataset.std)
 
     def calc_loss(self, x, target):
+        """Get average loss for the batch (and apply normalization)"""
         return torch.mean(F.cross_entropy(self.model(self.normalize(x)), target))
 
     def clip(self, adv, img, eps):
+        """L infinity clip"""
         return torch.clamp(torch.min(torch.max(adv, img - eps), img + eps), 0.0, 1.0)
 
     def forward(self, inp, target, eps, step_size, iterations, **kwargs):
@@ -30,7 +32,7 @@ class WhiteboxPGD(torch.nn.Module):
             adv = adv.clone().detach().requires_grad_(True)
             loss = self.calc_loss(adv, target)
             loss.backward()
-            adv = self.clip(adv + step_size * torch.sign(adv.grad.data), inp, eps) # gradient ASCENT
+            adv = self.clip(adv + step_size * torch.sign(adv.grad.data), inp, eps)  # gradient ASCENT
         return adv.clone().detach()
 
 
